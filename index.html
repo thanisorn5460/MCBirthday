@@ -19,7 +19,7 @@
     --vh: 1vh;
   }
   *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color: transparent;}
-  html,body{height:100%;}
+  html,body{min-height:100%;}
   body{
     font-family:'Sarabun', sans-serif;
     background: radial-gradient(circle at 50% 15%, #FFE9EC 0%, var(--cream) 45%, #FFDCE3 100%);
@@ -165,6 +165,296 @@
 
   .seal-hint{
     margin-top:1.4rem; font-size:0.74rem; color:var(--wine); opacity:0.5; padding:0 0.5rem;
+  }
+
+  /* ===== date-driven heart calendar (no storage needed) ===== */
+  .heart-calendar-wrap{ margin: 0.6rem 0 0.8rem; }
+  .early-countdown-text{
+    display:inline-block;
+    font-family:'Cormorant Garamond', serif; font-style:italic;
+    font-size:0.78rem; color:var(--wine);
+    background:rgba(217,165,102,0.14);
+    border:1px solid rgba(217,165,102,0.4);
+    border-radius:999px;
+    padding:0.35rem 0.9rem;
+    margin-bottom:0.8rem;
+  }
+  .early-countdown-text.ready{
+    background:linear-gradient(135deg, #F0C48F, var(--gold));
+    color:#fff;
+    border-color:transparent;
+    font-style:normal;
+    font-weight:600;
+  }
+  .heart-calendar-title{
+    font-family:'Cormorant Garamond', serif; font-style:italic;
+    font-size:0.95rem; color:var(--deep); opacity:0.85; margin-bottom:0.7rem;
+  }
+  .heart-calendar{
+    display:grid; grid-template-columns:repeat(7, 1fr); gap:5px;
+    max-width:308px; margin:0 auto;
+  }
+  .cal-day{
+    position:relative; aspect-ratio:1;
+    border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+    transition: transform .2s ease;
+  }
+  .cal-day .cal-num{
+    position:absolute; top:1px; left:3px;
+    font-size:0.5rem; font-weight:600; opacity:0.5;
+  }
+  .cal-day .cal-heart{ font-size:0.95rem; line-height:1; }
+
+  .cal-day.past{ background:rgba(255,107,139,0.18); }
+  .cal-day.past .cal-heart{ color:var(--rose); }
+  .cal-day.past .cal-num{ color:var(--deep); opacity:0.55; }
+
+  .cal-day.today{
+    background:linear-gradient(135deg, var(--rose), var(--deep));
+    cursor:pointer;
+    box-shadow:0 4px 12px -4px rgba(201,24,74,0.6);
+    animation: todayPulse 1.8s ease-in-out infinite;
+  }
+  .cal-day.today .cal-heart{ color:#fff; font-size:1.05rem; }
+  .cal-day.today .cal-num{ color:rgba(255,255,255,0.85); }
+  .cal-day.today.tapped{ animation: heartPop .5s ease; }
+
+  /* tap celebration effects for today's heart */
+  .ripple-effect{
+    position:absolute; top:50%; left:50%;
+    width:10px; height:10px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.65);
+    transform:translate(-50%,-50%) scale(0);
+    pointer-events:none;
+    animation: rippleExpand 0.6s ease-out forwards;
+    z-index:1;
+  }
+  @keyframes rippleExpand{
+    0%{ transform:translate(-50%,-50%) scale(0); opacity:0.75; }
+    100%{ transform:translate(-50%,-50%) scale(6); opacity:0; }
+  }
+
+  .mini-heart-float{
+    position:absolute; bottom:50%; left:50%;
+    font-size:0.75rem; color:#fff;
+    transform:translate(-50%, 0);
+    pointer-events:none;
+    animation: miniHeartFloat 1s ease-out forwards;
+    z-index:2;
+  }
+  @keyframes miniHeartFloat{
+    0%{ opacity:1; transform:translate(-50%,0) scale(0.8); }
+    100%{ opacity:0; transform:translate(calc(-50% + var(--drift, 0px)), -30px) scale(1.1); }
+  }
+
+  .sweet-popup{
+    position:absolute; bottom:100%; left:50%;
+    margin-bottom:5px;
+    background:rgba(122,30,61,0.94);
+    color:#fff;
+    font-size:0.66rem;
+    font-family:'Cormorant Garamond', serif; font-style:italic;
+    padding:0.35rem 0.7rem;
+    border-radius:10px;
+    white-space:nowrap;
+    opacity:0;
+    pointer-events:none;
+    z-index:6;
+    animation: sweetPopupShow 1.8s ease forwards;
+  }
+  .sweet-popup::after{
+    content:'';
+    position:absolute; top:100%; left:50%;
+    transform:translateX(-50%);
+    border:5px solid transparent;
+    border-top-color:rgba(122,30,61,0.94);
+  }
+  @keyframes sweetPopupShow{
+    0%{ opacity:0; transform:translateX(-50%) translateY(6px); }
+    15%{ opacity:1; transform:translateX(-50%) translateY(0); }
+    80%{ opacity:1; transform:translateX(-50%) translateY(0); }
+    100%{ opacity:0; transform:translateX(-50%) translateY(-6px); }
+  }
+  @keyframes todayPulse{
+    0%,100%{ transform:scale(1); }
+    50%{ transform:scale(1.07); }
+  }
+  @keyframes heartPop{
+    0%{ transform:scale(1); }
+    45%{ transform:scale(1.35); }
+    100%{ transform:scale(1); }
+  }
+
+  .cal-day.future{ background:rgba(122,30,61,0.055); }
+  .cal-day.future .cal-heart{ color:rgba(122,30,61,0.3); font-size:0.85rem; }
+  .cal-day.future .cal-num{ color:rgba(122,30,61,0.3); }
+
+  /* special early-surprise day */
+  .cal-day.special{ border-radius:8px; }
+  .cal-day.special.locked{
+    background:rgba(217,165,102,0.3);
+    border:1.5px dashed rgba(217,165,102,0.7);
+  }
+  .cal-day.special.locked .cal-heart{ color:#B9803C; font-size:0.95rem; }
+  .cal-day.special.locked .cal-num{ color:rgba(122,30,61,0.55); }
+  .cal-day.special.unlocked{
+    background:linear-gradient(135deg, #F0C48F, var(--gold) 60%, #C98A3E);
+    cursor:pointer;
+    box-shadow:0 4px 14px -4px rgba(217,165,102,0.75);
+    animation: specialGlow 2s ease-in-out infinite;
+  }
+  .cal-day.special.unlocked .cal-heart{ color:#fff; font-size:1.05rem; }
+  .cal-day.special.unlocked .cal-num{ color:rgba(255,255,255,0.85); }
+  .cal-day.special.unlocked.tapped{ animation: heartPop .5s ease; }
+  @keyframes specialGlow{
+    0%,100%{ transform:scale(1); box-shadow:0 4px 14px -4px rgba(217,165,102,0.75); }
+    50%{ transform:scale(1.09); box-shadow:0 6px 20px -4px rgba(217,165,102,0.95); }
+  }
+
+  /* early surprise modal */
+  .early-modal-overlay{
+    position:fixed; inset:0; z-index:20;
+    background:rgba(20,6,14,0.6);
+    backdrop-filter:blur(4px);
+    display:none;
+    align-items:center; justify-content:center;
+    padding:1.5rem;
+    opacity:0;
+    transition:opacity .3s ease;
+  }
+  .early-modal-overlay.show{ display:flex; }
+  .early-modal-overlay.show.visible{ opacity:1; }
+  .early-modal-card{
+    position:relative;
+    background:linear-gradient(160deg, #3D1128 0%, #7A1E3D 55%, #9C3A5C 100%);
+    border:1.5px solid rgba(217,165,102,0.55);
+    border-radius:18px;
+    padding:2.2rem 1.5rem;
+    max-width:340px;
+    width:100%;
+    text-align:center;
+    box-shadow:0 24px 60px -16px rgba(0,0,0,0.55);
+    transform:scale(0.9) translateY(10px);
+    transition:transform .35s cubic-bezier(0.34,1.3,0.64,1);
+    overflow:hidden;
+  }
+  .early-modal-card::before{
+    content:'';
+    position:absolute; inset:0;
+    background:
+      radial-gradient(circle at 20% 15%, rgba(217,165,102,0.18) 0, transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(217,165,102,0.14) 0, transparent 45%);
+    pointer-events:none;
+  }
+  .early-modal-overlay.show.visible .early-modal-card{ transform:scale(1) translateY(0); }
+
+  /* gift box unwrap scene */
+  .gift-box-scene{ position:relative; padding:0.6rem 0 0.4rem; cursor:pointer; }
+  .gift-box-hint{
+    font-size:0.75rem; color:rgba(255,240,225,0.7); margin-top:0.9rem;
+    font-family:'Cormorant Garamond', serif; font-style:italic;
+  }
+  .gift-box{
+    position:relative; width:110px; height:96px; margin:0.6rem auto 0;
+  }
+  .gift-box.shake{ animation: giftShake 0.5s ease; }
+  @keyframes giftShake{
+    0%,100%{ transform:rotate(0); }
+    20%{ transform:rotate(-6deg); }
+    40%{ transform:rotate(5deg); }
+    60%{ transform:rotate(-4deg); }
+    80%{ transform:rotate(3deg); }
+  }
+  .box-base{
+    position:absolute; bottom:0; left:5px; width:100px; height:62px;
+    background:linear-gradient(135deg, #E96B87, #C9184A);
+    border-radius:6px;
+    box-shadow:0 12px 22px -10px rgba(0,0,0,0.5);
+  }
+  .box-lid{
+    position:absolute; top:22px; left:0; width:110px; height:20px;
+    background:linear-gradient(135deg, #FF8FA3, #E15577);
+    border-radius:5px;
+    transform-origin:20% center;
+    transition: transform .7s cubic-bezier(0.34,1.3,0.64,1), opacity .5s ease;
+    z-index:2;
+  }
+  .box-lid.open{ transform: translateY(-46px) rotate(-42deg); opacity:0.85; }
+
+  .box-ribbon-v{
+    position:absolute; top:0; left:50%; width:13px; height:82px;
+    background:linear-gradient(180deg, #F0C48F, var(--gold));
+    transform:translateX(-50%);
+    z-index:3;
+    transition: transform .6s cubic-bezier(0.34,1.3,0.64,1), opacity .5s ease;
+  }
+  .box-ribbon-h{
+    position:absolute; top:33px; left:0; width:110px; height:13px;
+    background:linear-gradient(90deg, #F0C48F, var(--gold));
+    z-index:3;
+    display:flex;
+  }
+  .ribbon-h-half{
+    width:50%; height:100%;
+    background:linear-gradient(90deg, #F0C48F, var(--gold));
+    transition: transform .6s cubic-bezier(0.34,1.3,0.64,1), opacity .5s ease;
+  }
+  .ribbon-h-half.left{ transform-origin:right center; }
+  .ribbon-h-half.right{ transform-origin:left center; }
+  .box-bow{
+    position:absolute; top:-16px; left:50%; transform:translateX(-50%);
+    font-size:1.6rem; z-index:4;
+    transition: transform .5s ease, opacity .5s ease;
+  }
+  .gift-box.untied .box-ribbon-v{ transform:translateX(-50%) translateY(-30px); opacity:0; }
+  .gift-box.untied .ribbon-h-half.left{ transform:translateX(-40px) rotate(-25deg); opacity:0; }
+  .gift-box.untied .ribbon-h-half.right{ transform:translateX(40px) rotate(25deg); opacity:0; }
+  .gift-box.untied .box-bow{ transform:translateX(-50%) scale(0.3); opacity:0; }
+
+  .gift-message{ display:none; }
+  .gift-message.show{ display:block; animation: fadeInUp .6s ease; }
+  @keyframes fadeInUp{
+    0%{ opacity:0; transform:translateY(10px); }
+    100%{ opacity:1; transform:translateY(0); }
+  }
+
+  .early-modal-icon{ font-size:2.2rem; margin-bottom:0.6rem; }
+  .early-modal-title{
+    font-family:'Cormorant Garamond', serif; font-style:italic;
+    color:#FFF3E6; font-size:1.3rem; margin-bottom:0.8rem;
+  }
+  .early-modal-text{
+    font-family:'Cormorant Garamond', serif;
+    font-size:1.05rem; line-height:1.7; color:#FFE9DC;
+    white-space:pre-wrap; margin-bottom:1.3rem;
+  }
+  .early-modal-close{
+    background:transparent; color:#FFF3E6;
+    border:1.5px solid rgba(255,240,225,0.6); border-radius:999px;
+    padding:0.6rem 1.6rem; font-size:0.82rem; font-weight:600;
+    cursor:pointer; min-height:44px;
+    display:none;
+  }
+  .early-modal-close.show{ display:inline-block; }
+
+  .early-continue-btn{
+    background:linear-gradient(135deg, #F0C48F, var(--gold));
+    color:#3D1128;
+    border:none; border-radius:999px;
+    padding:0.6rem 1.6rem; font-size:0.82rem; font-weight:700;
+    cursor:pointer; min-height:44px;
+    margin-bottom:1rem;
+    display:none;
+    box-shadow:0 6px 16px -6px rgba(0,0,0,0.4);
+  }
+  .early-continue-btn.show{ display:inline-block; }
+
+  @media (prefers-reduced-motion: reduce){
+    .gift-box.shake{ animation:none; }
+    .cal-day.today{ animation:none; }
+    .cal-day.special.unlocked{ animation:none; }
   }
 
   #envelope-view{ display:none; transition: opacity .4s ease; position:relative; }
@@ -550,6 +840,40 @@
 <div class="heart-field" id="heartField"></div>
 <canvas id="confetti-canvas"></canvas>
 <button class="music-toggle" id="musicToggle" aria-label="Toggle music">🔇</button>
+<audio id="bgMusic" src="background-music.mp3" loop preload="none"></audio>
+
+<div class="early-modal-overlay" id="earlyModalOverlay">
+  <div class="early-modal-card">
+
+    <div class="gift-box-scene" id="giftBoxScene">
+      <div class="gift-box" id="giftBox">
+        <div class="box-bow" id="boxBow">🎀</div>
+        <div class="box-ribbon-v" id="boxRibbonV"></div>
+        <div class="box-ribbon-h" id="boxRibbonH">
+          <div class="ribbon-h-half left"></div>
+          <div class="ribbon-h-half right"></div>
+        </div>
+        <div class="box-lid" id="boxLid"></div>
+        <div class="box-base"></div>
+      </div>
+      <div class="gift-box-hint" id="giftBoxHint">Tap the gift to open it</div>
+    </div>
+
+    <div class="gift-message" id="giftMessage">
+      <div class="early-modal-icon">💌</div>
+      <div class="early-modal-title">A little something before our trip</div>
+      <div class="early-modal-text" id="earlyMessageText">I couldn't wait to give you a tiny piece of this early.
+
+We're about to spend a few quiet days away together — fresh air, slow mornings, and nowhere we need to rush to be.</div>
+
+      <button class="early-continue-btn" id="earlyContinueBtn">Continue →</button>
+
+      <div class="early-modal-text" id="earlyMessageText2"></div>
+      <button class="early-modal-close" id="earlyModalClose">Close</button>
+    </div>
+
+  </div>
+</div>
 
 <div class="stage">
 
@@ -617,6 +941,12 @@
       </div>
     </div>
 
+    <div class="heart-calendar-wrap">
+      <div class="early-countdown-text" id="earlyCountdownText"></div>
+      <div class="heart-calendar-title">Tap today's heart 💗</div>
+      <div class="heart-calendar" id="heartCalendar"></div>
+    </div>
+
     <div class="seal-hint">Counting down to August 26, 2026 🎂</div>
   </div>
 
@@ -649,12 +979,16 @@
       <div class="letter-greeting">My dearest love,</div>
       <div id="letter-text"><span class="cursor"></span></div>
 
+      <button class="btn continue-btn" id="letterContinueBtn1" style="margin:1rem 0;">Continue →</button>
+
       <div class="photo-card" id="photo1">
         <div class="photo-icon">📷</div>
         <div class="photo-caption">Your first photo goes here — the day we met</div>
       </div>
 
       <div id="letter-text-2" style="font-family:'Cormorant Garamond', serif; font-size:1.08rem; line-height:1.7; color:var(--wine); white-space:pre-wrap;"></div>
+
+      <button class="btn continue-btn" id="letterContinueBtn2" style="margin:1rem 0;">Continue →</button>
 
       <div class="photo-card" id="photo2">
         <div class="photo-icon">📷</div>
@@ -810,64 +1144,25 @@ function requestTiltPermission(){
 window.addEventListener('pointerdown', requestTiltPermission, { once:true });
 
 let audioCtx = null;
-let masterGain = null;
 let musicPlaying = false;
 let musicStarted = false;
 
-const PENTATONIC = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25];
-
+// used only for short sound effects (e.g. the gift-box bell chime), not background music
 function initAudio(){
   if(audioCtx) return;
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  masterGain = audioCtx.createGain();
-  masterGain.gain.value = 0;
-  masterGain.connect(audioCtx.destination);
-
-  const pad = audioCtx.createOscillator();
-  pad.type = 'sine';
-  pad.frequency.value = 130.81;
-  const padGain = audioCtx.createGain();
-  padGain.gain.value = 0.05;
-  pad.connect(padGain).connect(masterGain);
-  pad.start();
-
-  const pad2 = audioCtx.createOscillator();
-  pad2.type = 'sine';
-  pad2.frequency.value = 196.00;
-  const pad2Gain = audioCtx.createGain();
-  pad2Gain.gain.value = 0.035;
-  pad2.connect(pad2Gain).connect(masterGain);
-  pad2.start();
-
-  scheduleNotes();
 }
 
-function scheduleNotes(){
-  const playNote = () => {
-    if(!audioCtx) return;
-    const freq = PENTATONIC[Math.floor(Math.random()*PENTATONIC.length)];
-    const osc = audioCtx.createOscillator();
-    osc.type = 'triangle';
-    osc.frequency.value = freq;
-    const g = audioCtx.createGain();
-    g.gain.value = 0;
-    osc.connect(g).connect(masterGain);
-    const now = audioCtx.currentTime;
-    g.gain.linearRampToValueAtTime(0.09, now + 0.15);
-    g.gain.linearRampToValueAtTime(0, now + 1.6);
-    osc.start(now);
-    osc.stop(now + 1.7);
-  };
-  playNote();
-  setInterval(playNote, 1600);
-}
+const bgMusic = document.getElementById('bgMusic');
+bgMusic.volume = 0.35;
 
 function toggleMusic(){
-  initAudio();
-  if(audioCtx.state === 'suspended') audioCtx.resume();
   musicPlaying = !musicPlaying;
-  const target = musicPlaying ? 0.16 : 0;
-  masterGain.gain.linearRampToValueAtTime(target, audioCtx.currentTime + 1.2);
+  if(musicPlaying){
+    bgMusic.play().catch(()=>{ /* ignored — will retry on next user gesture */ });
+  } else {
+    bgMusic.pause();
+  }
   document.getElementById('musicToggle').textContent = musicPlaying ? '🔊' : '🔇';
 }
 document.getElementById('musicToggle').addEventListener('click', toggleMusic);
@@ -875,10 +1170,8 @@ document.getElementById('musicToggle').addEventListener('click', toggleMusic);
 function startMusicIfNeeded(){
   if(musicStarted) return;
   musicStarted = true;
-  initAudio();
-  if(audioCtx.state === 'suspended') audioCtx.resume();
   musicPlaying = true;
-  masterGain.gain.linearRampToValueAtTime(0.16, audioCtx.currentTime + 2);
+  bgMusic.play().catch(()=>{ /* autoplay may be blocked until a user gesture — that's fine, this call is itself a gesture-triggered attempt */ });
   document.getElementById('musicToggle').textContent = '🔊';
 }
 
@@ -896,6 +1189,33 @@ function formatNum(n){ return n.toString().padStart(2,'0'); }
 
 // 👉 Target date/time — set to midnight, August 26, 2026, Bangkok time (UTC+7)
 const TARGET_DATE = new Date('2026-08-26T00:00:00+07:00');
+// 👉 The early sneak-peek day (before the full surprise on TARGET_DATE)
+const EARLY_SURPRISE_DATE = new Date('2026-08-22T00:00:00+07:00');
+
+function updateEarlyCountdownText(){
+  const el = document.getElementById('earlyCountdownText');
+  if(!el) return;
+  const now = new Date();
+  const remainingMs = EARLY_SURPRISE_DATE - now;
+
+  if(remainingMs <= 0){
+    el.textContent = '🎁 Your sneak peek is ready — tap it below!';
+    el.classList.add('ready');
+  } else {
+    const totalSeconds = Math.floor(remainingMs / 1000);
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    let piece;
+    if(days > 0){
+      piece = `${days}d ${hours}h`;
+    } else {
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      piece = `${hours}h ${minutes}m`;
+    }
+    el.textContent = `⭐ Sneak peek unlocks in ${piece}`;
+    el.classList.remove('ready');
+  }
+}
 
 function startCountdown(){
   clearInterval(countdownTimer);
@@ -903,6 +1223,8 @@ function startCountdown(){
   const tick = () => {
     const now = new Date();
     let remainingMs = TARGET_DATE - now;
+
+    updateEarlyCountdownText();
 
     if(remainingMs <= 0){
       clearInterval(countdownTimer);
@@ -929,6 +1251,275 @@ function startCountdown(){
   countdownTimer = setInterval(tick, 1000);
 }
 startCountdown();
+
+/* =====================================================
+   HEART CALENDAR — purely date-driven, no storage needed.
+   Past days auto-show as collected, today is tappable,
+   future days stay locked. Works the same on any device
+   because it only ever compares to the real current date.
+   ===================================================== */
+// 👉 Set this to the day the countdown page goes live
+const CALENDAR_START = new Date('2026-07-18T00:00:00+07:00');
+
+function dateOnly(d){ return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+
+function buildHeartCalendar(){
+  const container = document.getElementById('heartCalendar');
+  if(!container) return;
+  container.innerHTML = '';
+
+  const start = dateOnly(CALENDAR_START);
+  const end = dateOnly(TARGET_DATE);
+  const today = dateOnly(new Date());
+  const specialDay = dateOnly(EARLY_SURPRISE_DATE);
+
+  const cursor = new Date(start);
+  while(cursor <= end){
+    const cellDate = new Date(cursor);
+    const cell = document.createElement('div');
+    cell.className = 'cal-day';
+
+    const num = document.createElement('div');
+    num.className = 'cal-num';
+    num.textContent = cellDate.getDate();
+
+    const heart = document.createElement('div');
+    heart.className = 'cal-heart';
+
+    if(cellDate.getTime() === specialDay.getTime()){
+      cell.classList.add('special');
+      if(today >= specialDay){
+        cell.classList.add('unlocked');
+        heart.textContent = '🎁';
+        cell.addEventListener('click', ()=>{
+          startMusicIfNeeded();
+          cell.classList.remove('tapped');
+          void cell.offsetWidth;
+          cell.classList.add('tapped');
+          openEarlyModal();
+        });
+      } else {
+        cell.classList.add('locked');
+        heart.textContent = '⭐';
+      }
+    } else if(cellDate < today){
+      cell.classList.add('past');
+      heart.textContent = '♥';
+    } else if(cellDate.getTime() === today.getTime()){
+      cell.classList.add('today');
+      heart.textContent = '♥';
+      cell.addEventListener('click', ()=>{
+        startMusicIfNeeded();
+        cell.classList.remove('tapped');
+        void cell.offsetWidth; // restart animation
+        cell.classList.add('tapped');
+        celebrateHeartTap(cell);
+      });
+    } else {
+      cell.classList.add('future');
+      heart.textContent = '♡';
+    }
+
+    cell.appendChild(num);
+    cell.appendChild(heart);
+    container.appendChild(cell);
+
+    cursor.setDate(cursor.getDate() + 1);
+  }
+}
+buildHeartCalendar();
+
+const SWEET_MESSAGES = [
+  'Missing you today 💗',
+  'Thinking of you',
+  'Can\'t wait to see you',
+  'You + me, always',
+  'Sending you a hug 🤍',
+  'I love you',
+  'You make my days better 💕',
+  'So lucky to have you',
+  'Falling for you all over again',
+  'Home is wherever you are'
+];
+
+function celebrateHeartTap(cell){
+  // ripple
+  const ripple = document.createElement('div');
+  ripple.className = 'ripple-effect';
+  cell.appendChild(ripple);
+  ripple.addEventListener('animationend', ()=> ripple.remove());
+
+  // floating mini hearts
+  for(let i=0;i<3;i++){
+    const h = document.createElement('div');
+    h.className = 'mini-heart-float';
+    h.textContent = '♥';
+    h.style.setProperty('--drift', (Math.random()*24 - 12) + 'px');
+    h.style.animationDelay = (i*0.08) + 's';
+    cell.appendChild(h);
+    h.addEventListener('animationend', ()=> h.remove());
+  }
+
+  // sweet message popup
+  const popup = document.createElement('div');
+  popup.className = 'sweet-popup';
+  popup.textContent = SWEET_MESSAGES[Math.floor(Math.random()*SWEET_MESSAGES.length)];
+  cell.appendChild(popup);
+  popup.addEventListener('animationend', ()=> popup.remove());
+}
+
+
+/* early surprise modal */
+const earlyModalOverlay = document.getElementById('earlyModalOverlay');
+const giftBox = document.getElementById('giftBox');
+const giftBoxScene = document.getElementById('giftBoxScene');
+const giftBoxHint = document.getElementById('giftBoxHint');
+const boxLid = document.getElementById('boxLid');
+const giftMessage = document.getElementById('giftMessage');
+const earlyContinueBtn = document.getElementById('earlyContinueBtn');
+const earlyModalCloseBtn = document.getElementById('earlyModalClose');
+let giftOpened = false;
+
+// capture the first segment's text once, before any typing modifies the element
+const EARLY_MESSAGE_TEXT_A = document.getElementById('earlyMessageText').textContent.trim();
+const EARLY_MESSAGE_TEXT_B = `I love you, and I'm so glad I get to spend this trip with you.
+
+The bigger surprise is still waiting back home for August 26th. This is just something small to carry with us on the road.`;
+
+function openEarlyModal(){
+  // reset to unopened gift-box state each time it's opened
+  giftOpened = false;
+  giftBox.classList.remove('shake', 'untied');
+  boxLid.classList.remove('open');
+  giftBoxScene.style.display = 'block';
+  giftMessage.classList.remove('show');
+  document.getElementById('earlyMessageText').innerHTML = '';
+  document.getElementById('earlyMessageText2').innerHTML = '';
+  earlyContinueBtn.classList.remove('show');
+  earlyModalCloseBtn.classList.remove('show');
+  giftBoxHint.textContent = 'Tap the gift to open it';
+
+  earlyModalOverlay.classList.add('show');
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=> earlyModalOverlay.classList.add('visible'));
+  });
+}
+
+function playBellChime(){
+  initAudio();
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  const now = audioCtx.currentTime;
+  [1046.5, 1568.0].forEach((freq, i)=>{
+    const osc = audioCtx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    const g = audioCtx.createGain();
+    g.gain.value = 0;
+    osc.connect(g).connect(audioCtx.destination);
+    const start = now + i*0.09;
+    g.gain.linearRampToValueAtTime(0.14, start + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, start + 1.1);
+    osc.start(start);
+    osc.stop(start + 1.15);
+  });
+}
+
+function openGiftBox(){
+  if(giftOpened) return;
+  giftOpened = true;
+  startMusicIfNeeded();
+
+  giftBox.classList.add('shake');
+  setTimeout(()=>{
+    giftBox.classList.add('untied');
+    setTimeout(()=>{
+      boxLid.classList.add('open');
+      playBellChime();
+      launchGlitter();
+      setTimeout(()=>{
+        giftBoxScene.style.display = 'none';
+        giftMessage.classList.add('show');
+        typeInto('earlyMessageText', EARLY_MESSAGE_TEXT_A, 26, ()=>{
+          earlyContinueBtn.classList.add('show');
+        });
+      }, 550);
+    }, 550);
+  }, 500);
+}
+giftBoxScene.addEventListener('click', openGiftBox);
+
+earlyContinueBtn.addEventListener('click', ()=>{
+  earlyContinueBtn.classList.remove('show');
+  typeInto('earlyMessageText2', EARLY_MESSAGE_TEXT_B, 26, ()=>{
+    earlyModalCloseBtn.classList.add('show');
+  });
+});
+
+function closeEarlyModal(){
+  earlyModalOverlay.classList.remove('visible');
+  setTimeout(()=> earlyModalOverlay.classList.remove('show'), 300);
+}
+document.getElementById('earlyModalClose').addEventListener('click', closeEarlyModal);
+earlyModalOverlay.addEventListener('click', (e)=>{
+  if(e.target === earlyModalOverlay) closeEarlyModal();
+});
+
+/* gold glitter burst — distinct from the regular rose/heart confetti */
+function launchGlitter(){
+  const pieces = [];
+  const count = 90;
+  const GLITTER_COLORS = ['#F0C48F', '#D9A566', '#FFE9C2', '#FFF6DE', '#C98A3E'];
+  for(let i=0;i<count;i++){
+    pieces.push({
+      x: canvas.width/2 + (Math.random()-0.5)*80,
+      y: canvas.height*0.35 + (Math.random()-0.5)*60,
+      size: 3 + Math.random()*4,
+      color: GLITTER_COLORS[Math.floor(Math.random()*GLITTER_COLORS.length)],
+      speedY: -3 - Math.random()*3,
+      speedX: (Math.random()-0.5)*6,
+      gravity: 0.12,
+      rot: Math.random()*360,
+      rotSpeed: (Math.random()-0.5)*14,
+      life: 0
+    });
+  }
+  let frame = 0;
+  const maxFrames = 90;
+
+  function drawStar(p){
+    ctx2d.save();
+    ctx2d.translate(p.x, p.y);
+    ctx2d.rotate(p.rot*Math.PI/180);
+    ctx2d.fillStyle = p.color;
+    ctx2d.beginPath();
+    for(let i=0;i<5;i++){
+      ctx2d.lineTo(Math.cos((18+i*72)*Math.PI/180)*p.size, -Math.sin((18+i*72)*Math.PI/180)*p.size);
+      ctx2d.lineTo(Math.cos((54+i*72)*Math.PI/180)*p.size*0.42, -Math.sin((54+i*72)*Math.PI/180)*p.size*0.42);
+    }
+    ctx2d.closePath();
+    ctx2d.fill();
+    ctx2d.restore();
+  }
+
+  function animate(){
+    ctx2d.clearRect(0,0,canvas.width, canvas.height);
+    pieces.forEach(p=>{
+      p.speedY += p.gravity;
+      p.x += p.speedX;
+      p.y += p.speedY;
+      p.rot += p.rotSpeed;
+      drawStar(p);
+    });
+    frame++;
+    if(frame < maxFrames){
+      requestAnimationFrame(animate);
+    } else {
+      ctx2d.clearRect(0,0,canvas.width, canvas.height);
+    }
+  }
+  animate();
+}
+
 
 function showEnvelope(){
   countdownView.style.opacity = '0';
@@ -1011,24 +1602,30 @@ function typeInto(elId, text, speed, onDone){
 
 function typeLetterSequence(){
   typeInto('letter-text', SEG1, 26, ()=>{
-    setTimeout(()=>{
-      document.getElementById('photo1').classList.add('show');
-      setTimeout(()=>{
-        typeInto('letter-text-2', SEG2, 26, ()=>{
-          setTimeout(()=>{
-            document.getElementById('photo2').classList.add('show');
-            setTimeout(()=>{
-              typeInto('letter-text-3', SEG3, 26, ()=>{
-                document.getElementById('letterSign').classList.add('show');
-                document.getElementById('continueBtn').classList.add('show');
-              });
-            }, 500);
-          }, 400);
-        });
-      }, 500);
-    }, 300);
+    document.getElementById('letterContinueBtn1').classList.add('show');
   });
 }
+
+document.getElementById('letterContinueBtn1').addEventListener('click', ()=>{
+  document.getElementById('letterContinueBtn1').classList.remove('show');
+  document.getElementById('photo1').classList.add('show');
+  setTimeout(()=>{
+    typeInto('letter-text-2', SEG2, 26, ()=>{
+      document.getElementById('letterContinueBtn2').classList.add('show');
+    });
+  }, 500);
+});
+
+document.getElementById('letterContinueBtn2').addEventListener('click', ()=>{
+  document.getElementById('letterContinueBtn2').classList.remove('show');
+  document.getElementById('photo2').classList.add('show');
+  setTimeout(()=>{
+    typeInto('letter-text-3', SEG3, 26, ()=>{
+      document.getElementById('letterSign').classList.add('show');
+      document.getElementById('continueBtn').classList.add('show');
+    });
+  }, 500);
+});
 
 document.getElementById('continueBtn').addEventListener('click', ()=>{
   letterView.style.display = 'none';
@@ -1127,6 +1724,8 @@ document.getElementById('restartAllBtn').addEventListener('click', ()=>{
   document.getElementById('photo2').classList.remove('show');
   document.getElementById('letterSign').classList.remove('show');
   document.getElementById('continueBtn').classList.remove('show');
+  document.getElementById('letterContinueBtn1').classList.remove('show');
+  document.getElementById('letterContinueBtn2').classList.remove('show');
 
   videoView.style.opacity = '0';
   videoView.style.display = 'none';
